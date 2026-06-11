@@ -1,0 +1,75 @@
+# =============================================================================
+# Self-test: this action testing itself
+#
+# Validates that action.yml is well-formed and entrypoint.sh runs without
+# syntax errors. Does NOT call the engine (no API key in CI).
+# =============================================================================
+
+name: Self-test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-action:
+    name: Validate action.yml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check action.yml syntax
+        run: |
+          echo "Checking action.yml is valid YAML..."
+          python3 -c "import yaml; yaml.safe_load(open('action.yml'))"
+          echo "✅ action.yml is valid"
+
+      - name: Check entrypoint.sh syntax
+        run: |
+          echo "Checking entrypoint.sh is valid bash..."
+          bash -n entrypoint.sh
+          echo "✅ entrypoint.sh is valid"
+
+      - name: Check action.yml has required fields
+        run: |
+          python3 -c "
+          import yaml
+          data = yaml.safe_load(open('action.yml'))
+          assert data['name'] == 'AI Evaluator', 'Missing name'
+          assert 'inputs' in data, 'Missing inputs'
+          assert 'outputs' in data, 'Missing outputs'
+          assert data['runs']['using'] == 'composite', 'Must be composite'
+          assert 'api-key' in data['inputs'], 'Missing api-key input'
+          assert 'agent-url' in data['inputs'], 'Missing agent-url input'
+          print('✅ All required fields present')
+          "
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: '.'
+          format: tty
+
+  validate-gitlab-component:
+    name: Validate GitLab component
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check gitlab-component.yml syntax
+        run: |
+          python3 -c "
+          import yaml
+          data = yaml.safe_load(open('gitlab-component.yml'))
+          assert 'spec' in data, 'Missing spec in component'
+          assert 'inputs' in data['spec'], 'Missing inputs in spec'
+          print('✅ gitlab-component.yml is valid')
+          "

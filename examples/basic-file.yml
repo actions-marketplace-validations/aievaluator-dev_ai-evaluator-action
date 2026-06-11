@@ -1,0 +1,36 @@
+# =============================================================================
+# Example: Basic evaluation with a dataset file committed in the repo
+#
+# Put your test cases in evals/regression.json or evals/regression.csv
+# and this workflow will evaluate your staging agent on every PR.
+# =============================================================================
+
+name: AI Quality Gate — File
+
+on:
+  pull_request:
+    paths:
+      - 'src/agent/**'
+      - 'evals/**'
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: AI Evaluation
+        uses: aievaluator/ai-evaluator-action@v1
+        with:
+          api-key: ${{ secrets.AI_EVALUATOR_API_KEY }}
+          agent-url: ${{ vars.STAGING_AGENT_URL }}
+          dataset: ./evals/regression.json
+          metrics: g_eval,faithfulness,hallucination
+          min-score: 0.80
+
+      - name: Deploy to production
+        if: success()
+        run: |
+          echo "All AI quality checks passed!"
+          echo "Deploying to production..."
+          # ./deploy.sh

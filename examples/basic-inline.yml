@@ -1,0 +1,28 @@
+# =============================================================================
+# Example: Quick smoke test with inline test cases + custom evaluator
+# =============================================================================
+
+name: AI Smoke Test — Inline
+
+on: [push]
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: aievaluator/ai-evaluator-action@v1
+        with:
+          api-key: ${{ secrets.AI_EVALUATOR_API_KEY }}
+          agent-url: ${{ vars.PROD_AGENT_URL }}
+          metrics: g_eval,faithfulness
+          min-score: 0.85
+          # Optional: inline custom evaluator
+          custom-evaluators: |
+            [
+              {"name": "legal-accuracy", "prompt": "You are a legal evaluator...", "threshold": 0.80}
+            ]
+          rows: |
+            [
+              {"input": "Hello", "expected_output": "Hi there!"},
+              {"input": "What is your name?", "expected_output": "I'm AI Agent."}
+            ]

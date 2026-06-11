@@ -1,0 +1,144 @@
+# =============================================================================
+# AI Evaluator — GitHub Action
+# Repo: ai-evaluator-action
+# =============================================================================
+
+name: "AI Evaluator"
+description: "Automated LLM quality gates for your CI/CD pipeline. www.aievaluator.dev"
+author: "AI Evaluator"
+
+branding:
+  icon: "check-circle"
+  color: "green"
+
+# ── Inputs ──────────────────────────────────────────────────────────
+
+inputs:
+  api-key:
+    description: "AI Evaluator API key (from dashboard)"
+    required: true
+
+  agent-url:
+    description: "URL of the agent endpoint to evaluate"
+    required: true
+
+  agent-format:
+    description: "Agent API format: openai, claude, or custom"
+    required: false
+    default: "openai"
+
+  agent-custom-template:
+    description: "Custom request template JSON (only for format=custom)"
+    required: false
+    default: ""
+
+  metrics:
+    description: "Comma-separated metric names (use UUIDs for custom evaluators)"
+    required: false
+    default: "g_eval,faithfulness"
+
+  custom-evaluators:
+    description: "Inline custom evaluator definitions as JSON array [{name, prompt, threshold}]"
+    required: false
+    default: "[]"
+
+  dataset:
+    description: "Path to a CSV or JSON dataset file for evaluation"
+    required: false
+    default: ""
+
+  rows:
+    description: "Inline JSON array of test cases [{input, expected_output}]"
+    required: false
+    default: ""
+
+  min-score:
+    description: "Minimum overall score threshold (0-1). Fails if below."
+    required: false
+    default: "0.0"
+
+  engine-url:
+    description: "Base URL of the AI Evaluator Engine API (www.aievaluator.dev)"
+    required: false
+    default: "https://api.aievaluator.dev"
+
+  mode:
+    description: "Evaluation mode: sync (wait for results) or async (poll)"
+    required: false
+    default: "sync"
+
+  timeout:
+    description: "Max seconds to wait for async evaluation (mode=async only)"
+    required: false
+    default: "300"
+
+  comment:
+    description: "Post evaluation results as a PR comment"
+    required: false
+    default: "true"
+
+  fail-on-limit:
+    description: "Fail the job if the tenant plan limits are exceeded"
+    required: false
+    default: "false"
+
+# ── Outputs ─────────────────────────────────────────────────────────
+
+outputs:
+  evaluation-id:
+    description: "UUID of the evaluation"
+    value: ${{ steps.evaluate.outputs.evaluation-id }}
+
+  overall-score:
+    description: "Overall evaluation score (0-1)"
+    value: ${{ steps.evaluate.outputs.overall-score }}
+
+  passed:
+    description: "Whether the evaluation met the min-score threshold"
+    value: ${{ steps.evaluate.outputs.passed }}
+
+  results-json:
+    description: "Full evaluation results as JSON string"
+    value: ${{ steps.evaluate.outputs.results-json }}
+
+  total-rows:
+    description: "Number of queries evaluated"
+    value: ${{ steps.evaluate.outputs.total-rows }}
+
+  input-tokens:
+    description: "Total input tokens consumed"
+    value: ${{ steps.evaluate.outputs.input-tokens }}
+
+  output-tokens:
+    description: "Total output tokens consumed"
+    value: ${{ steps.evaluate.outputs.output-tokens }}
+
+  failed-queries:
+    description: "Number of queries that did not pass"
+    value: ${{ steps.evaluate.outputs.failed-queries }}
+
+# ── Execution ───────────────────────────────────────────────────────
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run AI Evaluation
+      id: evaluate
+      shell: bash
+      env:
+        INPUT_API_KEY: ${{ inputs.api-key }}
+        INPUT_AGENT_URL: ${{ inputs.agent-url }}
+        INPUT_AGENT_FORMAT: ${{ inputs.agent-format }}
+        INPUT_AGENT_CUSTOM_TEMPLATE: ${{ inputs.agent-custom-template }}
+        INPUT_METRICS: ${{ inputs.metrics }}
+        INPUT_CUSTOM_EVALUATORS: ${{ inputs.custom-evaluators }}
+        INPUT_DATASET: ${{ inputs.dataset }}
+        INPUT_ROWS: ${{ inputs.rows }}
+        INPUT_MIN_SCORE: ${{ inputs.min-score }}
+        INPUT_ENGINE_URL: ${{ inputs.engine-url }}
+        INPUT_MODE: ${{ inputs.mode }}
+        INPUT_TIMEOUT: ${{ inputs.timeout }}
+        INPUT_COMMENT: ${{ inputs.comment }}
+        INPUT_FAIL_ON_LIMIT: ${{ inputs.fail-on-limit }}
+        GITHUB_TOKEN: ${{ github.token }}
+      run: ${{ github.action_path }}/entrypoint.sh

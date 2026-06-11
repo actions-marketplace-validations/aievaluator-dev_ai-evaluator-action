@@ -1,0 +1,72 @@
+# =============================================================================
+# Example: Full PR Quality Gate with evaluation → deploy → notification
+#
+# This is the recommended setup for teams:
+#   1. Evaluate staging agent against a curated test dataset
+#   2. Block deployment if score drops below threshold
+#   3. Post results as a PR comment
+#   4. Deploy only if passed
+# =============================================================================
+
+name: AI Quality Gate — PR
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'evals/**'
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    outputs:
+      passed: ${{ steps.ai-eval.outputs.passed }}
+      score: ${{ steps.ai-eval.outputs.overall-score }}
+      eval-id: ${{ steps.ai-eval.outputs.evaluation-id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to staging
+        run: |
+          echo "Deploying PR to staging environment..."
+          curl -X POST ${{ vars.STAGING_DEPLOY_WEBHOOK }}
+          sleep 10  # wait for deploy
+
+      - name: AI Evaluation
+        id: ai-eval
+        uses: aievaluator/ai-evaluator-action@v1
+        with:
+          api-key: ${{ secrets.AI_EVALUATOR_API_KEY }}
+          agent-url: ${{ vars.STAGING_AGENT_URL }}
+          dataset: ./evals/regression.json
+          metrics: g_eval,faithfulness,hallucination,bias
+          min-score: 0.80
+          comment: true
+
+      - name: Report status
+        if: always()
+        run: |
+          if [ "${{ steps.ai-eval.outputs.passed }}" = "true" ]; then
+            echo "✅ AI Eval passed! Score: ${{ steps.ai-eval.outputs.score }}"
+          else
+            echo "❌ AI Eval failed! Score: ${{ steps.ai-eval.outputs.score }}"
+            echo "See details: https://www.aievaluator.dev/evaluations/${{ steps.ai-eval.outputs.eval-id }}/report"
+          fi
+
+  deploy:
+    needs: [evaluate]
+    if: needs.evaluate.outputs.passed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to production
+        run: |
+          echo "All checks passed — deploying to production!"
+          echo "Eval ID: ${{ needs.evaluate.outputs.eval-id }}"
+          echo "Score: ${{ needs.evaluate.outputs.score }}"
+          # ./deploy-to-prod.sh
+
+      - name: Notify team
+        run: |
+          curl -X POST ${{ vars.SLACK_WEBHOOK }} \
+            -H "Content-Type: application/json" \
+            -d '{"text": "✅ Deployed to production. AI Eval score: ${{ needs.evaluate.outputs.score }}"}'
