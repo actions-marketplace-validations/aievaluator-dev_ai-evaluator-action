@@ -3,9 +3,9 @@
 # Repo: ai-evaluator-action
 # =============================================================================
 
-name: "AI Evaluator"
+name: "AI Evaluator Dev"
 description: "Automated LLM quality gates for your CI/CD pipeline. www.aievaluator.dev"
-author: "AI Evaluator"
+author: "AI Evaluator Dev"
 
 branding:
   icon: "check-circle"
