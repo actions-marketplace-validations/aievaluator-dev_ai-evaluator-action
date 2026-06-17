@@ -3,9 +3,9 @@
 # Repo: ai-evaluator-action
 # =============================================================================
 
-name: "AI Evaluator Dev"
-description: "Automated LLM quality gates for your CI/CD pipeline. www.aievaluator.dev"
-author: "AI Evaluator Dev"
+name: "AI Evaluator"
+description: "Run LLM-as-a-Judge evaluations against your AI agent in CI/CD"
+author: "AI Evaluator"
 
 branding:
   icon: "check-circle"
@@ -58,7 +58,7 @@ inputs:
     default: "0.0"
 
   engine-url:
-    description: "Base URL of the AI Evaluator Engine API (www.aievaluator.dev)"
+    description: "Base URL of the AI Evaluator Engine API"
     required: false
     default: "https://api.aievaluator.dev"
 
@@ -81,6 +81,16 @@ inputs:
     description: "Fail the job if the tenant plan limits are exceeded"
     required: false
     default: "false"
+
+  name:
+    description: "Human-readable name for this evaluation"
+    required: false
+    default: ""
+
+  judge-model:
+    description: "LLM judge model (deepseek, openai, local). Default: deepseek"
+    required: false
+    default: ""
 
 # ── Outputs ─────────────────────────────────────────────────────────
 

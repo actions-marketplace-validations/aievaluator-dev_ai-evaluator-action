@@ -160,12 +160,16 @@ else
     --argjson rows "$ROWS" \
     --argjson agent "$AGENT_JSON" \
     --argjson custom_evaluators "$CUSTOM_EVALUATORS" \
+    --arg name "${INPUT_NAME:-}" \
+    --arg judge_model "${INPUT_JUDGE_MODEL:-}" \
     --arg metrics "$METRICS" '{
     rows: $rows,
     agent: $agent,
     metrics: ($metrics | split(",")),
     custom_evaluators: $custom_evaluators
-  }')
+  } + (if $name != "" then {name: $name} else {} end)
+  + (if $judge_model != "" then {judge_model: $judge_model} else {} end)
+  ')
 
   HTTP_CODE=$(curl -sS -o "$TMP_RESULT" -w "%{http_code}" \
     -X POST "${ENGINE_URL}/api/v1/evaluations/sync" \
@@ -185,7 +189,8 @@ if [ "$HTTP_CODE" != "200" ]; then
   exit 1
 fi
 
-EVAL_ID=$(jq -r '.evaluation_id // ""' "$TMP_RESULT")
+EVAL_ID=$(jq -r '.definition_id // ""' "$TMP_RESULT")
+RUN_ID=$(jq -r '.run_id // ""' "$TMP_RESULT")
 OVERALL_SCORE=$(jq -r '.overall_score // 0' "$TMP_RESULT")
 PASSED=$(jq -r '.passed // false' "$TMP_RESULT")
 TOTAL_ROWS=$(jq -r '.total_rows // 0' "$TMP_RESULT")
@@ -199,6 +204,7 @@ SCORE_PCT=$(awk "BEGIN { printf \"%.1f\", ${OVERALL_SCORE} * 100 }")
 # ── Set outputs ─────────────────────────────────────────────────────
 
 set_output "evaluation-id" "$EVAL_ID"
+set_output "run-id" "$RUN_ID"
 set_output "overall-score" "$OVERALL_SCORE"
 set_output "passed" "$PASSED"
 set_output "results-json" "$(jq -c '.' "$TMP_RESULT")"

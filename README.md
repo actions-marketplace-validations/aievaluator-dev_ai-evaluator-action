@@ -10,7 +10,7 @@
 Automatically evaluate your LLM agent's quality on every PR:
 - ✅ **Quality gate**: blocks merge if score drops below threshold
 - ✅ **PR comments**: posts results with per-query breakdown table
-- ✅ **CSV/JSON dataset** or **inline test cases**
+- ✅ **JSON dataset** or **inline test cases**
 - ✅ **Custom evaluators**: define your own LLM-as-a-Judge metrics
 - ✅ Plan limit enforcement
 
@@ -34,7 +34,7 @@ jobs:
         with:
           api-key: ${{ secrets.AI_EVALUATOR_API_KEY }}
           agent-url: https://staging.my-agent.com/chat
-          dataset: ./evals/regression.csv
+          dataset: ./evals/regression.json
           metrics: g_eval,faithfulness
           min-score: 0.80
 
@@ -56,7 +56,7 @@ jobs:
 | `metrics` | | `g_eval,faithfulness` | Comma-separated metric names. Use UUIDs for custom evaluators |
 | `custom-evaluators` | | `[]` | Inline custom evaluators as JSON array `[{name, prompt, threshold}]` |
 | `min-score` | | `0.0` | Minimum overall score (0–1). Job fails if lower |
-| `dataset` | | — | Path to CSV/JSON file (mutually exclusive with `rows`) |
+| `dataset` | | — | Path to JSON file (mutually exclusive with `rows`) |
 | `rows` | | — | Inline JSON array `[{input, expected_output}]` (mutually exclusive with `dataset`) |
 | `mode` | | `sync` | `sync` (wait for results) or `async` (poll) |
 | `timeout` | | `300` | Max seconds to wait (async mode only) |
@@ -90,7 +90,7 @@ Define your own metrics inline — no need to create them in the UI first:
   with:
     api-key: ${{ secrets.AI_EVALUATOR_API_KEY }}
     agent-url: https://my-agent.com/chat
-    dataset: ./evals/test.csv
+    dataset: ./evals/test.json
     metrics: g_eval,faithfulness
     custom-evaluators: |
       [
@@ -103,14 +103,7 @@ The engine hashes `prompt + threshold` and auto-creates versions. If the same de
 
 ---
 
-## Dataset formats
-
-### CSV
-```csv
-input,expected_output
-"What is 2+2?","4"
-"Capital of France?","Paris"
-```
+## Dataset format
 
 ### JSON
 ```json

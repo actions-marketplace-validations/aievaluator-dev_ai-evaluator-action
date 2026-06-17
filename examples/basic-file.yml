@@ -1,7 +1,7 @@
 # =============================================================================
 # Example: Basic evaluation with a dataset file committed in the repo
 #
-# Put your test cases in evals/regression.json or evals/regression.csv
+# Put your test cases in evals/regression.json
 # and this workflow will evaluate your staging agent on every PR.
 # =============================================================================
 
