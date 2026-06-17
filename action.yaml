@@ -3,7 +3,7 @@
 # Repo: ai-evaluator-action
 # =============================================================================
 
-name: "AI Evaluator"
+name: "AI Evaluator Dev"
 description: "Run LLM-as-a-Judge evaluations against your AI agent in CI/CD"
 author: "AI Evaluator"
 
@@ -43,7 +43,7 @@ inputs:
     default: "[]"
 
   dataset:
-    description: "Path to a CSV or JSON dataset file for evaluation"
+    description: "Path to a JSON dataset file for evaluation"
     required: false
     default: ""
 
