@@ -1,6 +1,7 @@
 # ⚡ AI Evaluator — GitHub Action
 
-**Automated LLM quality gates for your CI/CD pipeline.**
+**Automated LLM quality gates for your CI/CD pipeline.**  
+**LLM-as-a-Judge · G-Eval · Faithfulness · Hallucination Detection**
 
 [www.aievaluator.dev](https://www.aievaluator.dev)
 
@@ -168,6 +169,12 @@ GitHub Runner                AI Evaluator Engine         Your Agent
 | Enterprise | Unlimited | Heavy usage |
 
 The action checks your plan limits before running and warns if you're close. Set `fail-on-limit: true` to block the pipeline instead.
+
+---
+
+## Support
+
+📧 [support@aievaluator.dev](mailto:support@aievaluator.dev)
 
 ---
 
