@@ -165,7 +165,7 @@ GitHub Runner                AI Evaluator Engine         Your Agent
 | Plan | Evals/cycle | Best for |
 |------|:-----------:|----------|
 | Free | 100 | Development & testing |
-| Pro | 5,000 | Team CI/CD |
+| Pro | 150 | Team CI/CD |
 | Enterprise | Unlimited | Heavy usage |
 
 The action checks your plan limits before running and warns if you're close. Set `fail-on-limit: true` to block the pipeline instead.
